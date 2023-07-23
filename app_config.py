@@ -41,10 +41,10 @@ class BaseConfig(object):
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # Max upload size if 16 MB
 
     # Email token settings
-    CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
-    RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
-    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(weeks=1)
-    RESET_PASSWORD_EXPIRY = datetime.timedelta(minutes=30)
+    # CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
+    # RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
+    # CONFIRM_EMAIL_EXPIRY = datetime.timedelta(weeks=1)
+    # RESET_PASSWORD_EXPIRY = datetime.timedelta(minutes=30)
 
     # JWT settings
     JWT_SECRET_KEY = os.getenv('SECRET_KEY')
@@ -54,48 +54,48 @@ class BaseConfig(object):
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 
     # Mail SMTP server settings
-    MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = int(os.getenv('MAIL_PORT'))
-    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL') == 'true'
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'true'
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_SENDER")}>'
+    # MAIL_SERVER = os.getenv('MAIL_SERVER')
+    # MAIL_PORT = int(os.getenv('MAIL_PORT'))
+    # MAIL_USE_SSL = os.getenv('MAIL_USE_SSL') == 'true'
+    # MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'true'
+    # MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    # MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    # MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_SENDER")}>'
 
     # AWS S3 settings
-    S3_REGION     = os.getenv('S3_REGION')
-    S3_BUCKET     = os.getenv('S3_BUCKET')
-    S3_ACCESS_KEY = os.getenv('S3_KEY')
-    S3_SECRET_KEY = os.getenv('S3_SECRET')
+    # S3_REGION     = os.getenv('S3_REGION')
+    # S3_BUCKET     = os.getenv('S3_BUCKET')
+    # S3_ACCESS_KEY = os.getenv('S3_KEY')
+    # S3_SECRET_KEY = os.getenv('S3_SECRET')
 
     # Google OAuth key and secret
-    GOOGLE_OAUTH_CLIENT_ID     = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
-    GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
+    # GOOGLE_OAUTH_CLIENT_ID     = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+    # GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
 
 """
 README: If you want to add a new configuration environment, add a new class like the examples below.
 """
 
-class LocalConfig(BaseConfig):
-    DEBUG = True
-    MODE = 'local'
-    DATABASE_NAME = 'develop-db'
-    FRONTEND_BASE_URL = 'http://localhost:3000'
-    BACKEND_BASE_URL = 'http://localhost:5000'
+# class LocalConfig(BaseConfig):
+#     DEBUG = True
+#     MODE = 'local'
+#     DATABASE_NAME = 'develop-db'
+#     FRONTEND_BASE_URL = 'http://localhost:3000'
+#     BACKEND_BASE_URL = 'http://localhost:5000'
 
-class DevelopmentConfig(BaseConfig):
-    DEBUG = True
-    MODE = 'dev'
-    DATABASE_NAME = 'develop-db'
-    FRONTEND_BASE_URL = 'http://localhost:3000'
-    BACKEND_BASE_URL = 'https://sc-backend-dev.herokuapp.com'
+# class DevelopmentConfig(BaseConfig):
+#     DEBUG = True
+#     MODE = 'dev'
+#     DATABASE_NAME = 'develop-db'
+#     FRONTEND_BASE_URL = 'http://localhost:3000'
+#     BACKEND_BASE_URL = 'https://sc-backend-dev.herokuapp.com'
 
-class StagingConfig(BaseConfig):
-    DEBUG = False
-    MODE = 'staging'
-    DATABASE_NAME = 'staging-db'
-    FRONTEND_BASE_URL = 'http://localhost:3000'
-    BACKEND_BASE_URL = 'https://sc-backend-staging.herokuapp.com'
+# class StagingConfig(BaseConfig):
+#     DEBUG = False
+#     MODE = 'staging'
+#     DATABASE_NAME = 'staging-db'
+#     FRONTEND_BASE_URL = 'http://localhost:3000'
+#     BACKEND_BASE_URL = 'https://sc-backend-staging.herokuapp.com'
 
 class ProductionConfig(BaseConfig):
     DEBUG = False

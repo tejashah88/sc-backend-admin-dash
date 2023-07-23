@@ -1,3 +1,7 @@
+import collections
+import collections.abc
+collections.Iterable = collections.abc.Iterable
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -8,10 +12,10 @@ from flask_json import JsonError
 import datetime
 
 import atexit
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 from init_app import app, flask_exts
-from blueprints import *
+from blueprints import monitor_blueprint
 
 from models import *
 
@@ -24,17 +28,13 @@ def handler(e):
     raise JsonError(status='error', reason='Expected JSON in body')
 
 
-@app.before_request
-def before_request_func():
-    """
-    HACK: This is a pre-request hook for allowing OPTIONS requests to go through, as part of fully supporting CORS.
-
-    NOTE: If you plan to remove it, test this in development AND production before confirming to remove it!
-    """
-
-    if not request.is_json:
-        if request.method == 'OPTIONS':
-            return 'OK'
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.headers.add('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin,Content-Type,Authorization')
+#     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+#     print(response.headers)
+#     return response
 
 
 @app.errorhandler(flask_exts.mongo.errors.ValidationError)
@@ -82,7 +82,7 @@ def user_identity_lookup(user):
     }
 
 
-@flask_exts.jwt.user_loader_callback_loader
+@flask_exts.jwt.user_lookup_loader
 def user_loader_callback(identity):
     """
     Given the decrypted identity object, find the corresponding user on the database and return it
@@ -96,7 +96,7 @@ def user_loader_callback(identity):
     ).first()
 
 
-@flask_exts.jwt.user_loader_error_loader
+@flask_exts.jwt.user_lookup_error_loader
 def custom_user_loader_error(identity):
     """
     If 'user_loader_callback' returns None, notify that the user couldn't be found.
@@ -105,7 +105,7 @@ def custom_user_loader_error(identity):
     return {'status': 'error', 'reason': 'User not found'}, 404
 
 
-@flask_exts.jwt.token_in_blacklist_loader
+@flask_exts.jwt.token_in_blocklist_loader
 def is_token_in_blacklist(decrypted_token):
     """
     This is called to check if given decrypted JWT is in the blocklist. If it is, return true and
@@ -155,51 +155,51 @@ def revoked_jwt_handler():
 
 
 # Load the Flask blueprints
-app.register_blueprint(user_blueprint)
-app.register_blueprint(catalog_blueprint)
-app.register_blueprint(admin_blueprint)
+# app.register_blueprint(user_blueprint)
+# app.register_blueprint(catalog_blueprint)
+# app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
-app.register_blueprint(student_blueprint)
+# app.register_blueprint(student_blueprint)
 
 
-def setup_background_jobs():
-    """
-    Setups a series of background jobs that run per a set schedule. These jobs range from updating if
-    application and recruitement deadlines have passed and for retraining the similar clubs recommendation
-    model if club descriptions have possibly changed.
-    """
-    scheduler = BackgroundScheduler()
+# def setup_background_jobs():
+#     """
+#     Setups a series of background jobs that run per a set schedule. These jobs range from updating if
+#     application and recruitement deadlines have passed and for retraining the similar clubs recommendation
+#     model if club descriptions have possibly changed.
+#     """
+#     scheduler = BackgroundScheduler()
 
-    def update_apply_required_or_recruiting_statuses():
-        """
-        Update if a club is open for applying or recruiting.
-        """
-        right_now_dt = pst_right_now()
+#     def update_apply_required_or_recruiting_statuses():
+#         """
+#         Update if a club is open for applying or recruiting.
+#         """
+#         right_now_dt = pst_right_now()
 
-        for officer_user in NewOfficerUser.objects:
-            if officer_user.club.app_required and officer_user.club.apply_deadline_start and officer_user.club.apply_deadline_end:
-                apply_deadline_in_range = officer_user.club.apply_deadline_start < right_now_dt and officer_user.club.apply_deadline_end > right_now_dt
-                officer_user.club.new_members = apply_deadline_in_range
-                officer_user.save()
-            elif not officer_user.club.app_required and officer_user.club.recruiting_start and officer_user.club.recruiting_end:
-                recruiting_period_in_range = officer_user.club.recruiting_start < right_now_dt and officer_user.club.recruiting_end > right_now_dt
-                officer_user.club.new_members = recruiting_period_in_range
-                officer_user.save()
+#         for officer_user in NewOfficerUser.objects:
+#             if officer_user.club.app_required and officer_user.club.apply_deadline_start and officer_user.club.apply_deadline_end:
+#                 apply_deadline_in_range = officer_user.club.apply_deadline_start < right_now_dt and officer_user.club.apply_deadline_end > right_now_dt
+#                 officer_user.club.new_members = apply_deadline_in_range
+#                 officer_user.save()
+#             elif not officer_user.club.app_required and officer_user.club.recruiting_start and officer_user.club.recruiting_end:
+#                 recruiting_period_in_range = officer_user.club.recruiting_start < right_now_dt and officer_user.club.recruiting_end > right_now_dt
+#                 officer_user.club.new_members = recruiting_period_in_range
+#                 officer_user.save()
 
-    def retrain_club_recommender_model():
-        """
-        Retrain the similar clubs recommender model.
-        """
-        flask_exts.club_recommender.train_or_load_model(force_train=True)
+#     def retrain_club_recommender_model():
+#         """
+#         Retrain the similar clubs recommender model.
+#         """
+#         flask_exts.club_recommender.train_or_load_model(force_train=True)
 
 
-    job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'cron', minute='*/1')
-    job = scheduler.add_job(retrain_club_recommender_model, 'cron', hour='*/4')
-    scheduler.start()
+#     job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'cron', minute='*/1')
+#     job = scheduler.add_job(retrain_club_recommender_model, 'cron', hour='*/4')
+#     scheduler.start()
 
-    # Register a shutdown handler to gracefully terminate and running jobs.
-    atexit.register(lambda: scheduler.shutdown())
+#     # Register a shutdown handler to gracefully terminate and running jobs.
+#     atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
-    setup_background_jobs()
+    # setup_background_jobs()
     app.run(load_dotenv=False, use_reloader=False)

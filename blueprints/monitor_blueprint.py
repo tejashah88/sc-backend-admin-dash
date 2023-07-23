@@ -8,7 +8,7 @@ from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
 from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations, confirmed_account_required
-from flask_jwt_extended import jwt_required, jwt_refresh_token_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
 
 from app_config import CurrentConfig
 
@@ -82,7 +82,7 @@ def login():
 
 # TODO: Refactor to not be duplicated here from User API
 @monitor_blueprint.route('/refresh', methods=['POST'])
-@jwt_refresh_token_required
+@jwt_required(refresh=True)
 @role_required(roles=['admin'])
 @confirmed_account_required
 def refresh():
@@ -103,7 +103,7 @@ def refresh():
 
 # TODO: Refactor to not be duplicated here from User API
 @monitor_blueprint.route('/revoke-access', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @confirmed_account_required
 def revoke_access():
@@ -127,7 +127,7 @@ def revoke_access():
 
 # TODO: Refactor to not be duplicated here from User API
 @monitor_blueprint.route('/revoke-refresh', methods=['DELETE'])
-@jwt_refresh_token_required
+@jwt_required(refresh=True)
 @role_required(roles=['admin'])
 @confirmed_account_required
 def revoke_refresh():
@@ -151,7 +151,7 @@ def revoke_refresh():
 
 
 @monitor_blueprint.route('/overview/stats/sign-up', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def fetch_sign_up_stats():
     """
@@ -222,7 +222,7 @@ def fetch_sign_up_stats():
 
 
 @monitor_blueprint.route('/overview/stats/activity', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def fetch_activity_stats():
     """
@@ -239,7 +239,7 @@ def fetch_activity_stats():
 
 
 @monitor_blueprint.route('/more-stats/social-media', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def fetch_social_media_stats():
@@ -252,7 +252,7 @@ def fetch_social_media_stats():
 
 
 @monitor_blueprint.route('/more-stats/club-reqs', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def fetch_club_req_stats():
@@ -265,7 +265,7 @@ def fetch_club_req_stats():
 
 
 @monitor_blueprint.route('/more-stats/pic-stats', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def fetch_picture_stats():
@@ -278,7 +278,7 @@ def fetch_picture_stats():
 
 
 @monitor_blueprint.route('/rso/list', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def list_rso_users():
@@ -291,7 +291,7 @@ def list_rso_users():
 
 
 @monitor_blueprint.route('/rso/download', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def download_rso_users():
     """
@@ -307,7 +307,7 @@ def download_rso_users():
 
 
 @monitor_blueprint.route('/rso', methods=['POST'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False}
@@ -328,7 +328,7 @@ def add_rso_user():
 
 
 @monitor_blueprint.route('/rso/<email>', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def remove_rso_user(email):
     """
@@ -348,7 +348,7 @@ def remove_rso_user(email):
 
 
 @monitor_blueprint.route('/club/list', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def list_clubs():
@@ -361,7 +361,7 @@ def list_clubs():
 
 
 @monitor_blueprint.route('/club/download', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def download_clubs():
     """
@@ -377,7 +377,7 @@ def download_clubs():
 
 
 @monitor_blueprint.route('/club/<email>', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def delete_club(email):
     """
@@ -393,7 +393,7 @@ def delete_club(email):
 
 
 @monitor_blueprint.route('/tags/list', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @as_json
 def list_tags_with_usage():
@@ -406,7 +406,7 @@ def list_tags_with_usage():
 
 
 @monitor_blueprint.route('/tags/download', methods=['GET'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def download_tags_with_usage():
     """
@@ -418,7 +418,7 @@ def download_tags_with_usage():
 
 
 @monitor_blueprint.route('/tags', methods=['POST'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False}
@@ -456,7 +456,7 @@ def add_tag():
 
 
 @monitor_blueprint.route('/tags/<tag_id>', methods=['PUT'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False}
@@ -482,7 +482,7 @@ def edit_tag(tag_id):
 
 
 @monitor_blueprint.route('/tags/<tag_id>', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 @role_required(roles=['admin'])
 def remove_tag(tag_id):
     """
