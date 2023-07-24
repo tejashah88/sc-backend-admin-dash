@@ -158,8 +158,8 @@ def fetch_sign_up_stats():
     GET endpoint that fetches the sign up statistics for all user account types.
     """
 
-    time_delta = pst_right_now() - datetime.timedelta(weeks=1)
-    history_deltas = [pst_right_now() - datetime.timedelta(weeks=delay) for delay in range(11)]
+    time_delta = pst_right_now() - datetime.timedelta(weeks=int(52 * 2.5))
+    history_deltas = [pst_right_now() - datetime.timedelta(weeks=delay) for delay in range(int(52 * 1.5), int(52 * 3), 2)]
 
     # Officer stats
     num_registered_clubs = NewOfficerUser.objects.count()
