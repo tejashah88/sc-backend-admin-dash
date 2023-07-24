@@ -83,12 +83,13 @@ def user_identity_lookup(user):
 
 
 @flask_exts.jwt.user_lookup_loader
-def user_loader_callback(identity):
+def user_loader_callback(jwt_header, jwt_payload):
     """
-    Given the decrypted identity object, find the corresponding user on the database and return it
+    Given the decrypted jwt_payload object, find the corresponding user on the database and return it
     if it exists. Otherwise return None.
     """
 
+    identity = jwt_payload['sub']
     return NewBaseUser.objects(
         email=identity['email'],
         role=identity['role'],
@@ -97,7 +98,7 @@ def user_loader_callback(identity):
 
 
 @flask_exts.jwt.user_lookup_error_loader
-def custom_user_loader_error(identity):
+def custom_user_loader_error(jwt_header, jwt_payload):
     """
     If 'user_loader_callback' returns None, notify that the user couldn't be found.
     """
@@ -106,13 +107,13 @@ def custom_user_loader_error(identity):
 
 
 @flask_exts.jwt.token_in_blocklist_loader
-def is_token_in_blacklist(decrypted_token):
+def is_token_in_blacklist(jwt_header, jwt_payload):
     """
     This is called to check if given decrypted JWT is in the blocklist. If it is, return true and
     return false otherwise.
     """
 
-    jti = decrypted_token['jti']
+    jti = jwt_payload['jti']
     access_jti = AccessJTI.objects(token_id=jti).first()
     refresh_jti = RefreshJTI.objects(token_id=jti).first()
 
@@ -127,7 +128,7 @@ def is_token_in_blacklist(decrypted_token):
 
 
 @flask_exts.jwt.expired_token_loader
-def expired_jwt_handler(exp_token):
+def expired_jwt_handler(jwt_header, jwt_payload):
     """
     Custom handler for when the given JWT has expired.
     """
@@ -146,7 +147,7 @@ def unauth_or_invalid_jwt_handler(reason):
 
 
 @flask_exts.jwt.revoked_token_loader
-def revoked_jwt_handler():
+def revoked_jwt_handler(jwt_headers, jwt_payload):
     """
     Custom handler for when the given JWT has been revoked.
     """

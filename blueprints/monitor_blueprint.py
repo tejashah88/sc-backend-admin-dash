@@ -8,7 +8,7 @@ from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
 from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations, confirmed_account_required
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
+from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jti, get_current_user
 
 from app_config import CurrentConfig
 
@@ -164,11 +164,15 @@ def fetch_sign_up_stats():
     # Officer stats
     num_registered_clubs = NewOfficerUser.objects.count()
     recent_num_registered_clubs = NewOfficerUser.objects.filter(registered_on__gte=time_delta).count()
-    num_registered_clubs_history = reversed(array_diff([NewOfficerUser.objects.filter(registered_on__gte=hist_delta).count() for hist_delta in history_deltas]))
+    num_registered_clubs_history = reversed(array_diff(
+        [NewOfficerUser.objects.filter(registered_on__gte=hist_delta).count() for hist_delta in history_deltas]
+    ))
 
     num_confirmed_clubs = NewOfficerUser.objects.filter(confirmed=True).count()
     recent_num_confirmed_clubs = NewOfficerUser.objects.filter(confirmed=True, registered_on__gte=time_delta).count()
-    num_confirmed_clubs_history = reversed(array_diff([NewOfficerUser.objects.filter(confirmed=True, registered_on__gte=hist_delta).count() for hist_delta in history_deltas]))
+    num_confirmed_clubs_history = reversed(array_diff(
+        [NewOfficerUser.objects.filter(confirmed=True, registered_on__gte=hist_delta).count() for hist_delta in history_deltas]
+    ))
 
     num_reactivated_clubs = NewOfficerUser.objects.filter(confirmed=True, club__reactivated=True).count()
     recent_num_reactivated_clubs = NewOfficerUser.objects.filter(

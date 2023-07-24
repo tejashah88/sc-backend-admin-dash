@@ -1,6 +1,6 @@
 from decorator import decorator
 
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 
 
 @decorator
@@ -32,7 +32,6 @@ def role_required(func, roles=[], *args, **kw):
     This endpoint would throw a 401 Unauthorized error if a student account tried using this endpoint.
     """
 
-    # verify_jwt_in_request()
     identity = get_jwt_identity()
 
     user_roles = set([identity['role']])

@@ -178,26 +178,54 @@ def fetch_aggregated_club_requirement_stats():
         }, {
             '$group': {
                 '_id': 1,
-                'app_required': {
+                'app_required_and_new_members': {
                     '$sum': {
-                        '$cond': ['$club.app_required', 1, 0]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    '$club.app_required',
+                                    '$club.new_members'
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'no_app_required': {
+                'app_required_and_no_new_members': {
                     '$sum': {
-                        '$cond': ['$club.app_required', 0, 1]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    '$club.app_required',
+                                    { '$not': '$club.new_members' }
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'new_members': {
+                'no_app_required_and_new_members': {
                     '$sum': {
-                        '$cond': ['$club.new_members', 1, 0]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    { '$not': '$club.app_required' },
+                                    '$club.new_members'
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'no_new_members': {
+                'no_app_required_and_no_new_members': {
                     '$sum': {
-                        '$cond': ['$club.new_members', 0, 1]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    { '$not': '$club.app_required' },
+                                    { '$not': '$club.new_members' }
+                                ]
+                            }, 1, 0
+                        ]
                     }
-                }
+                },
             }
         }, {
             '$project': {
@@ -221,26 +249,54 @@ def fetch_aggregated_picture_stats():
         }, {
             '$group': {
                 '_id': 1,
-                'logo_pic': {
+                'logo_pic_and_banner_pic': {
                     '$sum': {
-                        '$cond': ['$club.logo_url', 1, 0]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    '$club.logo_url',
+                                    '$club.banner_url'
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'no_logo_pic': {
+                'logo_pic_and_no_banner_pic': {
                     '$sum': {
-                        '$cond': ['$club.logo_url', 0, 1]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    '$club.logo_url',
+                                    { '$not': '$club.banner_url' }
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'banner_pic': {
+                'no_logo_pic_and_banner_pic': {
                     '$sum': {
-                        '$cond': ['$club.banner_url', 1, 0]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    { '$not': '$club.logo_url' },
+                                    '$club.banner_url'
+                                ]
+                            }, 1, 0
+                        ]
                     }
                 },
-                'no_banner_pic': {
+                'no_logo_pic_and_no_banner_pic': {
                     '$sum': {
-                        '$cond': ['$club.banner_url', 0, 1]
+                        '$cond': [
+                            {
+                                '$and': [
+                                    { '$not': '$club.logo_url' },
+                                    { '$not': '$club.banner_url' }
+                                ]
+                            }, 1, 0
+                        ]
                     }
-                }
+                },
             }
         }, {
             '$project': {

@@ -1,6 +1,6 @@
 from decorator import decorator
 
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 
 
 @decorator
@@ -26,7 +26,6 @@ def confirmed_account_required(func, *args, **kw):
         }
     """
     
-    # verify_jwt_in_request()
     identity = get_jwt_identity()
 
     if identity['confirmed']:
