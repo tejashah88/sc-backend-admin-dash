@@ -8,7 +8,7 @@ from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
 from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations, confirmed_account_required
-from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jti, get_current_user
+from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jti, get_current_user, get_jwt
 
 from app_config import CurrentConfig
 
@@ -111,7 +111,7 @@ def revoke_access():
     DELETE endpoint that revokes an issued access token, preventing further use of it.
     """
 
-    jti = get_raw_jwt()['jti']
+    jti = get_jwt()['jti']
 
     access_jti = AccessJTI.objects(token_id=jti).first()
     if access_jti is None:
@@ -135,7 +135,7 @@ def revoke_refresh():
     DELETE endpoint that revokes an issued refresh token, preventing further use of it.
     """
 
-    jti = get_raw_jwt()['jti']
+    jti = get_jwt()['jti']
 
     refresh_jti = RefreshJTI.objects(token_id=jti).first()
     if refresh_jti is None:
